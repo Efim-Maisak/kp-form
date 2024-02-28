@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useMemo} from "react";
 import { Field, useField, useFormikContext } from 'formik';
 
 
@@ -11,11 +11,15 @@ const SubTotalField = (props) => {
 
     const [field] = useField(props);
 
-    const subTotalCount = (price, amount) => {
-        const multiplicated = (parseFloat(price.replace(",", ".")) * Number(amount)).toFixed(2);
-        const formattedNumber = parseFloat(multiplicated).toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-        return formattedNumber;
-    }
+    const subTotalCount = useMemo( () => {
+      return (price, amount) => {
+      if (typeof price === "string") {
+          const multiplicated = (parseFloat(price.replace(",", ".")) * Number(amount)).toFixed(2);
+          const formattedNumber = parseFloat(multiplicated).toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          return formattedNumber;
+        }
+      };
+    }, [values.goods[props.index].price, values.goods[props.index].amount]);
 
     useEffect(() => {
       if (

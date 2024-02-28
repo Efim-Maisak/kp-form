@@ -12,12 +12,14 @@ const TotalField = (props) => {
     const [field] = useField(props);
 
     const countTotal = (values) => {
-        const parseValue = (value) => parseFloat(value.replaceAll(/[^\d.,]/g, "").replace(",", "."));
-        const filtered = values.goods.filter( item => item.subtotal !== "");
-        const total = filtered.reduce((acc, curr) => {
-            return acc + parseValue(curr.subtotal);
+        if(values && values.goods && values.goods.length >  0) {
+          const parseValue = (value) => parseFloat(value.replaceAll(/[^\d.,]/g, "").replace(",", "."));
+          const filtered = values.goods.filter( item => item.subtotal !== "");
+          const total = filtered.reduce((acc, curr) => {
+          return acc + parseValue(curr.subtotal);
         }, 0);
         return total.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
     };
 
     useEffect(() => {

@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useMemo} from "react";
 import { Field, useField, useFormikContext } from 'formik';
 
 const NdsField = (props) => {
@@ -10,11 +10,13 @@ const NdsField = (props) => {
 
     const [field] = useField(props);
 
-    const ndsCount = (values) => {
+    const ndsCount = useMemo( () => {
+        return (values) => {
         const parseValue = (value) => parseFloat(value.replaceAll(/[^\d.,]/g, "").replace(",", "."));
         const nds = (parseValue(values.total) * 20) / 100;
         return nds.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
+        }
+    }, [values.total]);
 
     useEffect(() => {
         if(values.total) {

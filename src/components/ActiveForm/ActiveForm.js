@@ -1,6 +1,6 @@
 import React from "react";
 import { Formik, Field, Form, ErrorMessage, FieldArray } from 'formik';
-import { Flex, Input, Box, Text, IconButton, Heading, Button as ChakraButton } from '@chakra-ui/react';
+import { Flex, VStack, Input, Box, Text, IconButton, Heading, Button as ChakraButton } from '@chakra-ui/react';
 import { CloseIcon } from '@chakra-ui/icons'
 import SubTotalField from "../SubTotalField/SubTotalField";
 import TotalField from "../TotalField/TotalField";
@@ -11,6 +11,8 @@ import TotalWithNdsField from "../TotalWithNdsField/TotalWithNdsField";
 const ActiveForm = () => {
 
     const initialValues = {
+        outgoing_number: "",
+        outgoing_date: "",
         goods: [
           {
             name: "",
@@ -66,6 +68,41 @@ const ActiveForm = () => {
             >
                 {({ values, isSubmitting, errors }) => (
                 <Form>
+                    <VStack maxW="500px" py="16px">
+                        <Box py="8px" alignSelf="flex-start">
+                        <Text fontWeight="bold">Реквизиты исходящего письма</Text>
+                        </Box>
+                        <Flex w="100%" flexDirection="row" justifyContent="flex-start">
+                            <Box w="200px" mr="8px">
+                                <Field
+                                w="100%"
+                                name={`outgoing_number`}
+                                placeholder="Номер"
+                                focusBorderColor="red.200"
+                                autoComplete="off"
+                                type="text"
+                                as={Input}
+                                validate={validateName}
+                                />
+                                <ErrorMessage
+                                name={`outgoing_number`}
+                                component={Box}
+                                className="field-error"
+                                color="red"
+                                fontSize="14px"
+                                />
+                            </Box>
+                            <Box w="200px">
+                                <Field
+                                w="100%"
+                                name={`outgoing_date`}
+                                focusBorderColor="red.200"
+                                type="date"
+                                as={Input}
+                                />
+                            </Box>
+                        </Flex>
+                    </VStack>
                 <FieldArray name="goods">
                     {({ insert, remove, push }) => (
                     <div>
