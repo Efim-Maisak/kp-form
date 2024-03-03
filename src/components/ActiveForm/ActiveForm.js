@@ -1,4 +1,4 @@
-import React, { useState} from "react";
+import React, { useState, useEffect} from "react";
 import { Formik, Field, Form, ErrorMessage, FieldArray } from "formik";
 import { Flex, VStack, Input, Box, Text, Textarea, IconButton, Heading, Button as ChakraButton } from '@chakra-ui/react';
 import { CloseIcon, PlusSquareIcon } from "@chakra-ui/icons";
@@ -68,23 +68,24 @@ const ActiveForm = () => {
     ];
 
     const selectStyles = {
-        control: (baseStyles, {isFocused, isSelected}) => {
-            return {...baseStyles,
-                    borderRadius: 8,
-                    borderColor: isSelected ? "#F56565" : "gray",
-                 }},
-        option: (baseStyles, {data, isDisabled, isFocused, isSelected}) => {
-            return {...baseStyles,
-                    backgroundColor: isSelected ? "#F56565" : "#fff"
-                }
-        },
-        singleValue: (baseStyles, {isFocused}) => {
-            return {
-                ...baseStyles,
-                backgroundColor: isFocused ? "#FEB2B2" : "#fff"
-            }
-        }
-    };
+        control: (baseStyles, { isFocused, isSelected }) => ({
+          ...baseStyles,
+          borderRadius: 8,
+          borderColor: isSelected ? "#FEB2B2" : "#E2E8F0",
+          boxShadow: isFocused ? "0 0 0 2px #FEB2B2" : "none",
+          '&:hover': {
+            borderColor: isFocused ? "#E2E8F0": "#CBD5E0"
+          }
+        }),
+        option: (baseStyles, { isDisabled, isSelected }) => ({
+          ...baseStyles,
+          backgroundColor: isSelected ? "#F56565" : "#fff",
+          color: isDisabled ? "#ccc" : "#333",
+          '&:hover': {
+            backgroundColor: "#FEB2B2"
+          }
+        })
+      };
 
     const handleSelectChange = (selectedValue) => {
         setSelectedOption(selectedValue);
@@ -95,9 +96,32 @@ const ActiveForm = () => {
         callback(filteredOptions);
     };
 
+    const getCustomersList = async () => {
+        const baseUrl = process.env.REACT_APP_BASEROW_URL;
+        const token = process.env.REACT_APP_BASEROW_TOKEN;
+
+        try {
+            const response = await fetch(`${baseUrl}?filter__field_7972__boolean=true&include=-field_7625,-field_7972`, {
+                method: "GET",
+                headers: {
+                    Authorization: token
+                }
+            });
+            const result = await response.json()
+            .then( data => setCustomers(data.results));
+        }catch(e) {
+            throw new Error(e.message);
+        }
+    };
+
+    useEffect(() => {
+        getCustomersList();
+    }, []);
+
 
     return (
         <>
+        {console.log(customers)}
         <Flex bg="white" flexDirection="column" h="100vh" alignContent="center" p={8}>
             <Heading as="h1" py="32px" size="lg">Расчет коммерческого предложения</Heading>
             <Box maxW="408px">
