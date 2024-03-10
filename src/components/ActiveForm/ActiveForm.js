@@ -1,18 +1,29 @@
 import React, { useState, useEffect} from "react";
 import { Formik, Field, Form, ErrorMessage, FieldArray } from "formik";
-import { Flex, VStack, Input, Box, Text, Textarea, IconButton, Heading, Button as ChakraButton } from '@chakra-ui/react';
+import { Flex, VStack, Input, Box, Text, Textarea, IconButton, Heading, Link, Button as ChakraButton } from '@chakra-ui/react';
 import { CloseIcon, PlusSquareIcon } from "@chakra-ui/icons";
 import SubTotalField from "../SubTotalField/SubTotalField";
 import TotalField from "../TotalField/TotalField";
 import NdsField from "../NdsField/NdsField";
 import TotalWithNdsField from "../TotalWithNdsField/TotalWithNdsField";
-import AsyncSelect from "react-select";
+import AsyncSelect from "react-select/async";
+import { TemplateHandler } from 'easy-template-x';
+import { formatDate } from "../../utils/formatDate";
 
 
 const ActiveForm = () => {
 
-    const [customers, setCustomers] = useState(null);
+    const baseUrl = process.env.REACT_APP_BASEROW_URL;
+    const fileUrl = process.env.REACT_APP_BASEROW_MEDIA_URL;
+    const token = process.env.REACT_APP_BASEROW_TOKEN;
+
+    const [options, setOptions] = useState(null);
+    const [customer, setCustomer] = useState(null);
     const [selectedOption, setSelectedOption] = useState(null);
+    const [templateUrl, setTemplateUrl] = useState(null);
+    const [filename, setFilename] = useState(null);
+    const [linkIsShown, setLinkIsShown] = useState(false);
+
 
     const initialValues = {
         outgoing_number: "",
@@ -61,12 +72,6 @@ const ActiveForm = () => {
         return error;
     };
 
-    const options = [
-        {value: "01", label: "АО КБП"},
-        {value: "02", label: "ЗАО МНИТИ"},
-        {value: "03", label: "ИКИ РАН"}
-    ];
-
     const selectStyles = {
         control: (baseStyles, { isFocused, isSelected }) => ({
           ...baseStyles,
@@ -87,8 +92,90 @@ const ActiveForm = () => {
         })
       };
 
-    const handleSelectChange = (selectedValue) => {
-        setSelectedOption(selectedValue);
+    const prepareCustomersData = (data) => {
+        const preparedData = {
+            customerName: data.field_7625,
+            executor: data.field_7639,
+            customesBossFullName: data.field_7968,
+            customerPosition: data.field_7969,
+            customerAddress: data.field_7970,
+            customerBossShortName: data.field_7971,
+            customerBossName: data.field_7968.split(" ").slice(-2).join(" "),
+            appeal: "Уважаемый(ая)"
+        }
+
+        return preparedData;
+    };
+
+    const createOptionsList = (customersArr) => {
+        let optionsArr = [];
+
+        if(customersArr.length > 0) {
+            for(let i = 0; i <= customersArr.length; i++) {
+                if(customersArr[i]) {
+                    optionsArr.push({
+                        value: customersArr[i].id,
+                        label: customersArr[i].field_7625
+                    });
+                }
+            }
+        }
+        setOptions(optionsArr);
+    };
+
+    const getCustomersList = async () => {
+        try {
+            const response = await fetch(`${baseUrl}?filter__field_7972__boolean=true&include=-field_7625,-field_7972&order_by=field_7625`, {
+                method: "GET",
+                headers: {
+                    Authorization: token
+                }
+            });
+            await response.json().then( data => {
+                 createOptionsList(data.results);
+                });
+        }catch(e) {
+            throw new Error(e.message);
+        }
+    };
+
+    const getCustomersData = async (id) => {
+        try {
+            const response = await fetch(`${baseUrl}${id}/`, {
+                method: "GET",
+                headers: {
+                    Authorization: token
+                }
+            });
+            await response.json().then(data => {
+                setCustomer(prepareCustomersData(data));
+            })
+        } catch(e) {
+            throw new Error(e.message);
+        }
+    };
+
+    const createFromTemplate = async (formData, customerData) => {
+
+        const templateData = {...formData, ...customerData};
+        const fileName = "NX8Nri02iZwJPw3ezCXYObq3dorftsW2_5377577ab9442060a9c1798837e4a14daa24cb5f24c6bfe466e9cd39ed9d7bcf.docx"
+        const url = "https://corsproxy.io/?" + encodeURIComponent(`${fileUrl}/${fileName}`);
+
+        try {
+            const response = await fetch( url, {
+                method: "GET"
+            });
+            const templateFile = await response.blob();
+            const handler = new TemplateHandler();
+            console.log(templateData);
+            const doc = await handler.process(templateFile, templateData);
+            setTemplateUrl(URL.createObjectURL(doc));
+            setFilename(`КП № ${formData.outgoing_number} от ${formData.outgoing_date} в ${customerData.customerName}.docx`);
+            setLinkIsShown(true);
+
+        }catch(e) {
+            throw new Error(e.message);
+        }
     };
 
     const loadOptions = (searchValue, callback) => {
@@ -96,22 +183,9 @@ const ActiveForm = () => {
         callback(filteredOptions);
     };
 
-    const getCustomersList = async () => {
-        const baseUrl = process.env.REACT_APP_BASEROW_URL;
-        const token = process.env.REACT_APP_BASEROW_TOKEN;
-
-        try {
-            const response = await fetch(`${baseUrl}?filter__field_7972__boolean=true&include=-field_7625,-field_7972`, {
-                method: "GET",
-                headers: {
-                    Authorization: token
-                }
-            });
-            const result = await response.json()
-            .then( data => setCustomers(data.results));
-        }catch(e) {
-            throw new Error(e.message);
-        }
+    const handleSelectChange = (selectedValue) => {
+        setSelectedOption(selectedValue);
+        getCustomersData(selectedValue.value);
     };
 
     useEffect(() => {
@@ -121,23 +195,32 @@ const ActiveForm = () => {
 
     return (
         <>
-        {console.log(customers)}
         <Flex bg="white" flexDirection="column" h="100vh" alignContent="center" p={8}>
             <Heading as="h1" py="32px" size="lg">Расчет коммерческого предложения</Heading>
             <Box maxW="408px">
                 <Box py="16px">
                     <Text fontWeight="bold">Заказчик</Text>
                 </Box>
-                <AsyncSelect autoFocus placeholder="Выбор организации..." onChange={handleSelectChange} options={options} styles={selectStyles}/>
+                <AsyncSelect
+                autoFocus
+                placeholder="Выбор организации..."
+                onChange={handleSelectChange}
+                loadOptions={loadOptions}
+                defaultOptions={options}
+                styles={selectStyles}
+                />
             </Box>
-
             <Formik
             validateOnBlur
             initialValues={initialValues}
             onSubmit={async (values, {setSubmitting}) => {
-                await new Promise((r) => setTimeout(r, 500));
-                alert(JSON.stringify(values, null, 2));
-                console.log(JSON.stringify(values, null, 2));
+                setSubmitting(true);
+                const formatedValues = {
+                    ...values,
+                    outgoing_date: formatDate(values.outgoing_date),
+                    incoming_date: formatDate(values.incoming_date)
+                }
+                createFromTemplate(formatedValues, customer);
                 setSubmitting(false);
             }}
             >
@@ -412,6 +495,9 @@ const ActiveForm = () => {
                 </Form>
                 )}
             </Formik>
+            <Box pb="16px">
+                {linkIsShown ? <Link color="blue.500" download={filename} href={templateUrl}>{filename}</Link> : null}
+            </Box>
         </Flex>
         </>
     );
