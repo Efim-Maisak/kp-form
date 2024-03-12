@@ -20,9 +20,11 @@ const ActiveForm = () => {
     const [options, setOptions] = useState(null);
     const [customer, setCustomer] = useState(null);
     const [selectedOption, setSelectedOption] = useState(null);
-    const [templateUrl, setTemplateUrl] = useState(null);
+    const [documentUrl, setDocumentUrl] = useState(null);
     const [filename, setFilename] = useState(null);
     const [linkIsShown, setLinkIsShown] = useState(false);
+    const [templateDoc, setTemplateDoc] = useState(null);
+    const [loading, setLoading] = useState(true);
 
 
     const initialValues = {
@@ -155,26 +157,33 @@ const ActiveForm = () => {
         }
     };
 
-    const createFromTemplate = async (formData, customerData) => {
-
-        const templateData = {...formData, ...customerData};
-        const fileName = "NX8Nri02iZwJPw3ezCXYObq3dorftsW2_5377577ab9442060a9c1798837e4a14daa24cb5f24c6bfe466e9cd39ed9d7bcf.docx"
-        const url = "https://corsproxy.io/?" + encodeURIComponent(`${fileUrl}/${fileName}`);
-
+    const getTemplate = async () => {
+        const fileName = "aS2v8Auvipa3d03k44PZWqEg8aHxbFkX_f9d9bfd88142703fa981c5f14dfde2ac70038dee3f7be24a840a25c893bf7098.docx";
+        //const url = "https://corsproxy.io/?" + encodeURIComponent(`${fileUrl}/${fileName}`);
+        //const url = `https://api.codetabs.com/v1/proxy?quest=${fileUrl}/${fileName}`;
+        const url = `https://api.allorigins.win/raw?url=${fileUrl}/${fileName}`;
         try {
             const response = await fetch( url, {
                 method: "GET"
             });
             const templateFile = await response.blob();
+            setTemplateDoc(templateFile);
+            setLoading(false);
+        }catch(e) {
+            throw new Error(`Ошибка получения шаблона документа: ${e.message}`);
+        }
+    };
+
+    const createFromTemplate = async (formData, customerData, templateFile) => {
+        const templateData = {...formData, ...customerData};
+        try {
             const handler = new TemplateHandler();
-            console.log(templateData);
             const doc = await handler.process(templateFile, templateData);
-            setTemplateUrl(URL.createObjectURL(doc));
+            setDocumentUrl(URL.createObjectURL(doc));
             setFilename(`КП № ${formData.outgoing_number} от ${formData.outgoing_date} в ${customerData.customerName}.docx`);
             setLinkIsShown(true);
-
         }catch(e) {
-            throw new Error(e.message);
+            throw new Error(`Ошибка формирования документа: ${e.message}`);
         }
     };
 
@@ -190,6 +199,7 @@ const ActiveForm = () => {
 
     useEffect(() => {
         getCustomersList();
+        getTemplate();
     }, []);
 
 
@@ -218,9 +228,10 @@ const ActiveForm = () => {
                 const formatedValues = {
                     ...values,
                     outgoing_date: formatDate(values.outgoing_date),
-                    incoming_date: formatDate(values.incoming_date)
+                    incoming_date: formatDate(values.incoming_date),
+                    base_text: !values.incoming_number ? true : false
                 }
-                createFromTemplate(formatedValues, customer);
+                createFromTemplate(formatedValues, customer, templateDoc);
                 setSubmitting(false);
             }}
             >
@@ -489,14 +500,14 @@ const ActiveForm = () => {
                 variant="solid"
                 leftIcon={<PlusSquareIcon />}
                 my={8}
-                isDisabled={isSubmitting || Object.keys(errors).length > 0 ? true : false}>
+                isDisabled={loading || isSubmitting || Object.keys(errors).length > 0 ? true : false}>
                     Создать предложение
                 </ChakraButton>
                 </Form>
                 )}
             </Formik>
             <Box pb="16px">
-                {linkIsShown ? <Link color="blue.500" download={filename} href={templateUrl}>{filename}</Link> : null}
+                {linkIsShown ? <Link color="blue.500" download={filename} href={documentUrl}>{filename}</Link> : null}
             </Box>
         </Flex>
         </>
