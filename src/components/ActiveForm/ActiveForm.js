@@ -9,6 +9,8 @@ import TotalWithNdsField from "../TotalWithNdsField/TotalWithNdsField";
 import AsyncSelect from "react-select/async";
 import { TemplateHandler } from 'easy-template-x';
 import { formatDate } from "../../utils/formatDate";
+import { formatPrice } from "../../utils/formatPrice";
+import { getRespectfullTitle } from "../../utils/getRespectfullTitle";
 
 
 const ActiveForm = () => {
@@ -103,7 +105,7 @@ const ActiveForm = () => {
             customerAddress: data.field_7970,
             customerBossShortName: data.field_7971,
             customerBossName: data.field_7968.split(" ").slice(-2).join(" "),
-            appeal: "Уважаемый(ая)"
+            appeal: getRespectfullTitle(data.field_7968.split(" ")[2])
         }
 
         return preparedData;
@@ -158,7 +160,7 @@ const ActiveForm = () => {
     };
 
     const getTemplate = async () => {
-        const fileName = "aS2v8Auvipa3d03k44PZWqEg8aHxbFkX_f9d9bfd88142703fa981c5f14dfde2ac70038dee3f7be24a840a25c893bf7098.docx";
+        const fileName = "5K0doSGXKLtx0NchZpcUdsa757IrNvtE_4c55413bb599d9672b70789bc61b1a44de8488e2a88c6a217c82794d606355b4.docx";
         //const url = "https://corsproxy.io/?" + encodeURIComponent(`${fileUrl}/${fileName}`);
         //const url = `https://api.codetabs.com/v1/proxy?quest=${fileUrl}/${fileName}`;
         const url = `https://api.allorigins.win/raw?url=${fileUrl}/${fileName}`;
@@ -229,8 +231,10 @@ const ActiveForm = () => {
                     ...values,
                     outgoing_date: formatDate(values.outgoing_date),
                     incoming_date: formatDate(values.incoming_date),
-                    base_text: !values.incoming_number ? true : false
+                    base_text: !values.incoming_number ? true : false,
+                    goods: formatPrice(values.goods)
                 }
+                console.log(formatedValues);
                 createFromTemplate(formatedValues, customer, templateDoc);
                 setSubmitting(false);
             }}
