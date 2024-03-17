@@ -1,7 +1,7 @@
 import React, { useState, useEffect} from "react";
 import { Formik, Field, Form, ErrorMessage, FieldArray } from "formik";
-import { Flex, VStack, Input, Box, Text, Textarea, IconButton, Heading, Link, Button as ChakraButton } from '@chakra-ui/react';
-import { CloseIcon, PlusSquareIcon } from "@chakra-ui/icons";
+import { Flex, VStack, Input, Box, Text, Textarea, IconButton, Heading, Link, useMediaQuery, Button as ChakraButton } from '@chakra-ui/react';
+import { CloseIcon } from "@chakra-ui/icons";
 import SubTotalField from "../SubTotalField/SubTotalField";
 import TotalField from "../TotalField/TotalField";
 import NdsField from "../NdsField/NdsField";
@@ -11,6 +11,12 @@ import { TemplateHandler } from 'easy-template-x';
 import { formatDate } from "../../utils/formatDate";
 import { formatPrice } from "../../utils/formatPrice";
 import { getRespectfullTitle } from "../../utils/getRespectfullTitle";
+import { validateName } from "../../utils/validateName";
+import { validatePrice } from "../../utils/validatePrice";
+import { validateAmount } from "../../utils/validateAmount";
+import { getDativeCase } from "../../utils/getDativeCase";
+import { HiDocumentCheck } from "react-icons/hi2";
+import { IoMdAddCircle } from "react-icons/io";
 
 
 const ActiveForm = () => {
@@ -27,6 +33,8 @@ const ActiveForm = () => {
     const [linkIsShown, setLinkIsShown] = useState(false);
     const [templateDoc, setTemplateDoc] = useState(null);
     const [loading, setLoading] = useState(true);
+
+    const [isSmallerThan900] = useMediaQuery("(max-width: 900px)");
 
 
     const initialValues = {
@@ -48,32 +56,6 @@ const ActiveForm = () => {
         total: "",
         nds: "",
         totalWithNds: ""
-    };
-
-    const validateName = (value) => {
-        let error;
-        if (!value) {
-          error = "Поле не должно быть пустым";
-        }
-        return error;
-    };
-
-    const validatePrice = (value) => {
-        let error;
-        const priceRegex = /^\d+(,\d{2})?$/;
-        if(!priceRegex.test(value)) {
-            error = "Неверный формат";
-        }
-        return error;
-    };
-
-    const validateAmount = (value) => {
-        let error;
-        const amountRegex = /^(0|[1-9]\d*)$/;
-        if(!amountRegex.test(value)) {
-            error = "Введите число";
-        }
-        return error;
     };
 
     const selectStyles = {
@@ -103,7 +85,7 @@ const ActiveForm = () => {
             customesBossFullName: data.field_7968,
             customerPosition: data.field_7969,
             customerAddress: data.field_7970,
-            customerBossShortName: data.field_7971,
+            customerBossShortName: getDativeCase(data.field_7971),
             customerBossName: data.field_7968.split(" ").slice(-2).join(" "),
             appeal: getRespectfullTitle(data.field_7968.split(" ")[2])
         }
@@ -161,8 +143,6 @@ const ActiveForm = () => {
 
     const getTemplate = async () => {
         const fileName = "5K0doSGXKLtx0NchZpcUdsa757IrNvtE_4c55413bb599d9672b70789bc61b1a44de8488e2a88c6a217c82794d606355b4.docx";
-        //const url = "https://corsproxy.io/?" + encodeURIComponent(`${fileUrl}/${fileName}`);
-        //const url = `https://api.codetabs.com/v1/proxy?quest=${fileUrl}/${fileName}`;
         const url = `https://api.allorigins.win/raw?url=${fileUrl}/${fileName}`;
         try {
             const response = await fetch( url, {
@@ -207,7 +187,7 @@ const ActiveForm = () => {
 
     return (
         <>
-        <Flex bg="white" flexDirection="column" h="100vh" alignContent="center" p={8}>
+        <Flex bg="white" flexDirection="column" alignContent="center" p={isSmallerThan900 ? "4" : "12"}>
             <Heading as="h1" py="32px" size="lg">Расчет коммерческого предложения</Heading>
             <Box maxW="408px">
                 <Box py="16px">
@@ -309,7 +289,7 @@ const ActiveForm = () => {
                     <div>
                         {values.goods.length > 0 &&
                         values.goods.map((good, index) => (
-                        <Flex h="75px" flexDirection="row" justifyContent="space-between" alignItems="flex-start" className="row" key={index} pt={4}>
+                        <Flex h={isSmallerThan900 ? "300" : "75"} flexDirection={isSmallerThan900 ? "column" : "row"} justifyContent="space-between" alignItems="flex-start" className="row" key={index} pt={4}>
                             <Box w="40px" h="40px" borderRadius="full" bg="red.300" display="flex" justifyContent="center" alignItems="center">
                                 <Text color="white" fontWeight="bold" textAlign="center" verticalAlign="middle" fontSize="18px">{index + 1}</Text>
                             </Box>
@@ -391,6 +371,7 @@ const ActiveForm = () => {
                     mt={4}
                     colorScheme="gray"
                     variant="outline"
+                    leftIcon={<IoMdAddCircle fontSize="22px"/>}
                     onClick={() => push({ name: "", price: "", amount: "", subtotal: "" })}
                     >
                     Добавить позицию
@@ -450,6 +431,8 @@ const ActiveForm = () => {
                             autoComplete="off"
                             type="text"
                             size="sm"
+                            overflow="hidden"
+                            maxH="300px"
                             as={Textarea}
                             validate={validateName}
                             />
@@ -472,6 +455,8 @@ const ActiveForm = () => {
                             autoComplete="off"
                             type="text"
                             size="sm"
+                            overflow="hidden"
+                            maxH="300px"
                             as={Textarea}
                             validate={validateName}
                             />
@@ -494,6 +479,8 @@ const ActiveForm = () => {
                             autoComplete="off"
                             type="text"
                             size="sm"
+                            overflow="hidden"
+                            maxH="400px"
                             as={Textarea}
                             />
                         </Box>
@@ -502,7 +489,7 @@ const ActiveForm = () => {
                 colorScheme="gray"
                 type="submit"
                 variant="solid"
-                leftIcon={<PlusSquareIcon />}
+                leftIcon={<HiDocumentCheck fontSize="22px"/>}
                 my={8}
                 isDisabled={loading || isSubmitting || Object.keys(errors).length > 0 ? true : false}>
                     Создать предложение
