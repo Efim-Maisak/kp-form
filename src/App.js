@@ -1,16 +1,23 @@
 import React from "react";
 import { ChakraProvider } from '@chakra-ui/react'
-import ActiveForm from "./components/ActiveForm/ActiveForm";
-import FormWrapper from "./components/FormWrapper/FormWrapper";
+import {
+  FiFileText,
+  FiSettings,
+} from "react-icons/fi"
+import OfferPage from "./components/Pages/OfferPage";
 
 
 function App() {
+
+  const linkItems = [
+    { name: "Предложение", icon: FiFileText },
+    { name: "Настройки", icon: FiSettings }
+  ];
+
   return (
     <ChakraProvider>
       <div className="App">
-        <FormWrapper>
-            <ActiveForm/>
-        </FormWrapper>
+        <OfferPage linkItems={linkItems}/>
       </div>
     </ChakraProvider>
   );

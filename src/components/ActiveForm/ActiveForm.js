@@ -187,7 +187,7 @@ const ActiveForm = () => {
 
     return (
         <>
-        <Flex bg="white" flexDirection="column" alignContent="center" p={isSmallerThan900 ? "4" : "12"}>
+        <Flex bg="white" borderRadius="8px" flexDirection="column" alignContent="center" p={isSmallerThan900 ? "4" : "8"}>
             <Heading as="h1" py="32px" size="lg">Расчет коммерческого предложения</Heading>
             <Box maxW="408px">
                 <Box py="16px">
@@ -433,6 +433,7 @@ const ActiveForm = () => {
                             size="sm"
                             overflow="hidden"
                             maxH="300px"
+                            borderRadius="8px"
                             as={Textarea}
                             validate={validateName}
                             />
@@ -457,6 +458,7 @@ const ActiveForm = () => {
                             size="sm"
                             overflow="hidden"
                             maxH="300px"
+                            borderRadius="8px"
                             as={Textarea}
                             validate={validateName}
                             />
@@ -481,6 +483,7 @@ const ActiveForm = () => {
                             size="sm"
                             overflow="hidden"
                             maxH="400px"
+                            borderRadius="8px"
                             as={Textarea}
                             />
                         </Box>
@@ -491,7 +494,7 @@ const ActiveForm = () => {
                 variant="solid"
                 leftIcon={<HiDocumentCheck fontSize="22px"/>}
                 my={8}
-                isDisabled={loading || isSubmitting || Object.keys(errors).length > 0 ? true : false}>
+                isDisabled={!selectedOption ||loading || isSubmitting || Object.keys(errors).length > 0 ? true : false}>
                     Создать предложение
                 </ChakraButton>
                 </Form>
