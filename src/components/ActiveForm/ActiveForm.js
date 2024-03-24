@@ -142,7 +142,7 @@ const ActiveForm = () => {
     };
 
     const getTemplate = async () => {
-        const fileName = "5K0doSGXKLtx0NchZpcUdsa757IrNvtE_4c55413bb599d9672b70789bc61b1a44de8488e2a88c6a217c82794d606355b4.docx";
+        const fileName = "w0jYPHzI7MlMQda0Y7WDUOW4gFgoC3RD_df7c55158fffc5eacf48709f75ad4c3a878f5f103cc54507377f8f80f962e67d.docx";
         const url = `https://api.allorigins.win/raw?url=${fileUrl}/${fileName}`;
         try {
             const response = await fetch( url, {
@@ -214,7 +214,6 @@ const ActiveForm = () => {
                     base_text: !values.incoming_number ? true : false,
                     goods: formatPrice(values.goods)
                 }
-                console.log(formatedValues);
                 createFromTemplate(formatedValues, customer, templateDoc);
                 setSubmitting(false);
             }}

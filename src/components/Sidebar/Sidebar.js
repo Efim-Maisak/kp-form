@@ -5,7 +5,7 @@ import {
     Drawer,
     DrawerContent,
     useDisclosure,
-  } from "@chakra-ui/react"
+  } from "@chakra-ui/react";
 import MobileNav from "../MobileNav/MobileNav";
 import SidebarContent from "../SidebarContent/SidebarContent";
 

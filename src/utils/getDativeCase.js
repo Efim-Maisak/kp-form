@@ -18,7 +18,7 @@ export const getDativeCase = (name) => {
         return nameParts[0] + " " + dativeCaseSurname.join("-");
     }
 
-    if (["в", "н", "ч"].includes(surname.slice(-1).toLowerCase())) {
+    if (["в", "н", "ч", "к"].includes(surname.slice(-1).toLowerCase())) {
         return name + "у";
     } else if(["а"].includes(surname.slice(-1).toLowerCase())) {
         const cutted =  name.slice(0, -1);

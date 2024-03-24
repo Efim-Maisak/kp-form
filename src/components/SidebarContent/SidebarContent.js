@@ -32,9 +32,9 @@ const SidebarContent = ({onClose, linkItems, ...rest}) => {
             <Text display={{ base: "block", md: "none" }} fontSize="2xl" fontWeight="bold">Меню</Text>
             <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
           </Flex>
-          {linkItems && linkItems.map((link) => (
-            <NavItem key={link.name} icon={link.icon}>
-              {link.name}
+          {linkItems && linkItems.map((element) => (
+            <NavItem key={element.name} icon={element.icon} link={element.link}>
+              {element.name}
             </NavItem>
           ))}
         </Box>
