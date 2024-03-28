@@ -1,6 +1,17 @@
 import React, { useState, useEffect} from "react";
 import { Formik, Field, Form, ErrorMessage, FieldArray } from "formik";
-import { Flex, VStack, Input, Box, Text, Textarea, IconButton, Heading, Link, useMediaQuery, Button as ChakraButton } from '@chakra-ui/react';
+import { Flex,
+         VStack,
+         Input,
+         Box,
+         Text,
+         Textarea,
+         IconButton,
+         Heading,
+         Link,
+         useToast,
+         useMediaQuery,
+         Button as ChakraButton } from '@chakra-ui/react';
 import { CloseIcon } from "@chakra-ui/icons";
 import SubTotalField from "../SubTotalField/SubTotalField";
 import TotalField from "../TotalField/TotalField";
@@ -35,6 +46,8 @@ const ActiveForm = () => {
     const [loading, setLoading] = useState(true);
 
     const [isSmallerThan900] = useMediaQuery("(max-width: 900px)");
+    const [isSmallerThan420] = useMediaQuery("(max-width: 420px)");
+    const toast = useToast();
 
 
     const initialValues = {
@@ -164,7 +177,21 @@ const ActiveForm = () => {
             setDocumentUrl(URL.createObjectURL(doc));
             setFilename(`КП № ${formData.outgoing_number} от ${formData.outgoing_date} в ${customerData.customerName}.docx`);
             setLinkIsShown(true);
+            toast({
+                description: "Предложение создано",
+                status: "success",
+                position: "top-right",
+                duration: 2000,
+                isClosable: false,
+              })
         }catch(e) {
+            toast({
+                description: "Ошибка генерации документа",
+                status: "error",
+                position: "top-right",
+                duration: 2000,
+                isClosable: false,
+              })
             throw new Error(`Ошибка формирования документа: ${e.message}`);
         }
     };
@@ -292,7 +319,7 @@ const ActiveForm = () => {
                             <Box w="40px" h="40px" borderRadius="full" bg="red.300" display="flex" justifyContent="center" alignItems="center">
                                 <Text color="white" fontWeight="bold" textAlign="center" verticalAlign="middle" fontSize="18px">{index + 1}</Text>
                             </Box>
-                            <Box w="350px" mr="8px" className="col">
+                            <Box w={isSmallerThan900 ? "100%" : "350px"} mr="8px" className="col">
                                 <Field
                                 w="100%"
                                 name={`goods.${index}.name`}
@@ -368,6 +395,7 @@ const ActiveForm = () => {
                     ))}
                     <ChakraButton
                     mt={4}
+                    mb={isSmallerThan900 ? 8 : 4}
                     colorScheme="gray"
                     variant="outline"
                     leftIcon={<IoMdAddCircle fontSize="22px"/>}
@@ -381,7 +409,7 @@ const ActiveForm = () => {
                 <Flex w="100%" pt="8px" flexDirection="row" justifyContent="right">
                     <Box w="400px">
                         <Flex flexDirection="row" justifyContent="flex-end" alignItems="center">
-                            <Text pr="8px" fontWeight="bold">Итого: </Text>
+                            <Text pr="8px" fontSize={isSmallerThan420 ? "14px" : null} fontWeight="bold">Итого: </Text>
                             <TotalField
                                 w="200px"
                                 variant="filled"
@@ -393,7 +421,7 @@ const ActiveForm = () => {
                                 />
                         </Flex>
                         <Flex pt="8px" flexDirection="row" justifyContent="flex-end" alignItems="center">
-                            <Text pr="8px" fontWeight="bold">НДС: </Text>
+                            <Text pr="8px" fontSize={isSmallerThan420 ? "14px" : null} fontWeight="bold">НДС: </Text>
                             <NdsField
                                 w="200px"
                                 variant="filled"
@@ -404,8 +432,13 @@ const ActiveForm = () => {
                                 as={Input}
                                 />
                         </Flex>
-                        <Flex pt="8px" flexDirection="row" justifyContent="flex-end" alignItems="center">
-                            <Text pr="8px" fontWeight="bold">Итого с НДС: </Text>
+                        <Flex
+                        pt="8px"
+                        flexDirection="row"
+                        justifyContent="flex-end"
+                        alignItems="center"
+                        >
+                            <Text pr="8px" fontSize={isSmallerThan420 ? "14px" : null} fontWeight="bold">Итого с НДС: </Text>
                             <TotalWithNdsField
                                 w="200px"
                                 variant="filled"

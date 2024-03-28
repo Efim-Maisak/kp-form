@@ -23,7 +23,7 @@ const NavItem = ({icon, link, children, ...rest}) => {
           cursor="pointer"
           _hover={{
             bg: "red.300",
-            color: 'white',
+            color: 'white'
           }}
           {...rest}>
           {icon && (
