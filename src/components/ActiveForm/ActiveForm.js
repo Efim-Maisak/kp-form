@@ -95,6 +95,7 @@ const ActiveForm = () => {
         const preparedData = {
             customerName: data.field_7625,
             executor: data.field_7639,
+            executorPosition: data.field_8239,
             customesBossFullName: data.field_7968,
             customerPosition: data.field_7969,
             customerAddress: data.field_7970,
@@ -155,7 +156,7 @@ const ActiveForm = () => {
     };
 
     const getTemplate = async () => {
-        const fileName = "w0jYPHzI7MlMQda0Y7WDUOW4gFgoC3RD_df7c55158fffc5eacf48709f75ad4c3a878f5f103cc54507377f8f80f962e67d.docx";
+        const fileName = "yB7zbddEHP93Rs1SmMOqcfHze2sDOu2t_4a3094c105bd94027747187e3cebd1c03d73124a7bc41fc82ff0ed141388742a.docx";
         const url = `https://api.allorigins.win/raw?url=${fileUrl}/${fileName}`;
         try {
             const response = await fetch( url, {
