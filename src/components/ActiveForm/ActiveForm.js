@@ -18,6 +18,7 @@ import TotalField from "../TotalField/TotalField";
 import NdsField from "../NdsField/NdsField";
 import TotalWithNdsField from "../TotalWithNdsField/TotalWithNdsField";
 import AsyncSelect from "react-select/async";
+import Select from "react-select";
 import { TemplateHandler } from 'easy-template-x';
 import { formatDate } from "../../utils/formatDate";
 import { formatPrice } from "../../utils/formatPrice";
@@ -33,17 +34,22 @@ import { IoMdAddCircle } from "react-icons/io";
 const ActiveForm = () => {
 
     const baseUrl = process.env.REACT_APP_BASEROW_URL;
+    const templateUrl = process.env.REACT_APP_TEMPLATE_URL;
     const fileUrl = process.env.REACT_APP_BASEROW_MEDIA_URL;
     const token = process.env.REACT_APP_BASEROW_TOKEN;
 
     const [options, setOptions] = useState(null);
+    const [leaderOptions, setLeaderOptions] = useState(null);
     const [customer, setCustomer] = useState(null);
-    const [selectedOption, setSelectedOption] = useState(null);
+    const [leaders, setLeaders] = useState(null);
+    const [selectedCustomerOption, setSelectedCustomerOption] = useState(null);
+    const [selectedLeader, setSelectedLeader] = useState(null);
     const [documentUrl, setDocumentUrl] = useState(null);
     const [filename, setFilename] = useState(null);
     const [linkIsShown, setLinkIsShown] = useState(false);
     const [templateDoc, setTemplateDoc] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [leaderSelectIsVisible, setLeaderSelectIsVisible] = useState(false);
 
     const [isSmallerThan900] = useMediaQuery("(max-width: 900px)");
     const [isSmallerThan420] = useMediaQuery("(max-width: 420px)");
@@ -91,6 +97,29 @@ const ActiveForm = () => {
         })
       };
 
+      const prepareLeadersOptions = (data) => {
+        let leadersArr = []
+        let optionsArr = [];
+
+        if(data.field_8274.length > 0) {
+            for(let i = 0; i < data.field_8274.length; i++) {
+                optionsArr.push({
+                    value: data.field_8274[i].id,
+                    label: data.field_8275[i].value
+                });
+                leadersArr.push({
+                    id: data.field_8274[i].id,
+                    leaderFullName: data.field_8274[i].value,
+                    leaderShortName: data.field_8275[i].value,
+                    leaderPosition: data.field_8276[i].value
+                });
+            }
+        }
+        setLeaders(leadersArr);
+        setSelectedLeader(optionsArr[0]);
+        return optionsArr;
+    };
+
     const prepareCustomersData = (data) => {
         const preparedData = {
             customerName: data.field_7625,
@@ -105,6 +134,19 @@ const ActiveForm = () => {
         }
 
         return preparedData;
+    };
+
+    const prepareLeaderData = (selectedLeader, leaders) => {
+        const selectedLeaderArr = leaders.filter( item => item.id == selectedLeader.value)
+        const leader = selectedLeaderArr[0];
+        leader = {
+            customesBossFullName: leader.leaderFullName,
+            customerPosition: leader.leaderPosition,
+            customerBossShortName: getDativeCase(leader.leaderShortName),
+            customerBossName: leader.leaderFullName.split(" ").slice(-2).join(" "),
+            appeal: getRespectfullTitle(leader.leaderFullName.split(" ")[2])
+        }
+        return leader;
     };
 
     const createOptionsList = (customersArr) => {
@@ -148,15 +190,33 @@ const ActiveForm = () => {
                 }
             });
             await response.json().then(data => {
+                console.log(data);
                 setCustomer(prepareCustomersData(data));
+                setLeaderOptions(prepareLeadersOptions(data));
             })
         } catch(e) {
             throw new Error(e.message);
         }
     };
 
+    const getFileName = async () => {
+        try {
+            const response = await fetch(templateUrl, {
+                method: "GET",
+                headers: {
+                    Authorization: token
+                }
+            });
+            const data = await response.json();
+            return data.field_8014[0].name;
+        } catch(e) {
+            throw new Error(`Ошибка получения имени файла шаблона: ${e.message}`);
+        }
+    };
+
+
     const getTemplate = async () => {
-        const fileName = "yB7zbddEHP93Rs1SmMOqcfHze2sDOu2t_4a3094c105bd94027747187e3cebd1c03d73124a7bc41fc82ff0ed141388742a.docx";
+        const fileName = await getFileName();
         const url = `https://api.allorigins.win/raw?url=${fileUrl}/${fileName}`;
         try {
             const response = await fetch( url, {
@@ -202,9 +262,14 @@ const ActiveForm = () => {
         callback(filteredOptions);
     };
 
-    const handleSelectChange = (selectedValue) => {
-        setSelectedOption(selectedValue);
+    const handleCutomerSelectChange = (selectedValue) => {
+        setSelectedCustomerOption(selectedValue);
         getCustomersData(selectedValue.value);
+        setLeaderSelectIsVisible(true);
+    };
+
+    const handleLeaderSelectChange = (selectedValue) => {
+        setSelectedLeader(selectedValue);
     };
 
     useEffect(() => {
@@ -224,11 +289,27 @@ const ActiveForm = () => {
                 <AsyncSelect
                 autoFocus
                 placeholder="Выбор организации..."
-                onChange={handleSelectChange}
+                onChange={handleCutomerSelectChange}
                 loadOptions={loadOptions}
                 defaultOptions={options}
                 styles={selectStyles}
                 />
+            </Box>
+            <Box
+            maxW="408px"
+            display={leaderSelectIsVisible ? "block" : "none"}
+            >
+                <Box py="16px">
+                    <Text fontWeight="bold">Руководитель заказчика</Text>
+                </Box>
+                {leaderOptions && (
+                    <Select
+                    value={selectedLeader}
+                    onChange={handleLeaderSelectChange}
+                    options={leaderOptions}
+                    styles={selectStyles}
+                    />
+                )}
             </Box>
             <Formik
             validateOnBlur
@@ -276,6 +357,7 @@ const ActiveForm = () => {
                                 <Field
                                 w="100%"
                                 name={`outgoing_date`}
+                                placeholder="Дата"
                                 focusBorderColor="red.200"
                                 type="date"
                                 as={Input}
@@ -301,6 +383,7 @@ const ActiveForm = () => {
                                 <Field
                                 w="100%"
                                 name={`incoming_date`}
+                                placeholder="Дата"
                                 focusBorderColor="red.200"
                                 type="date"
                                 as={Input}
@@ -527,7 +610,7 @@ const ActiveForm = () => {
                 variant="solid"
                 leftIcon={<HiDocumentCheck fontSize="22px"/>}
                 my={8}
-                isDisabled={!selectedOption ||loading || isSubmitting || Object.keys(errors).length > 0 ? true : false}>
+                isDisabled={!selectedCustomerOption ||loading || isSubmitting || Object.keys(errors).length > 0 ? true : false}>
                     Создать предложение
                 </ChakraButton>
                 </Form>
