@@ -98,7 +98,7 @@ const ActiveForm = () => {
       };
 
       const prepareLeadersOptions = (data) => {
-        let leadersArr = []
+        let leadersArr = [];
         let optionsArr = [];
 
         if(data.field_8274.length > 0) {
@@ -125,20 +125,14 @@ const ActiveForm = () => {
             customerName: data.field_7625,
             executor: data.field_7639,
             executorPosition: data.field_8239,
-            customesBossFullName: data.field_7968,
-            customerPosition: data.field_7969,
-            customerAddress: data.field_7970,
-            customerBossShortName: getDativeCase(data.field_7971),
-            customerBossName: data.field_7968.split(" ").slice(-2).join(" "),
-            appeal: getRespectfullTitle(data.field_7968.split(" ")[2])
+            customerAddress: data.field_7970
         }
-
         return preparedData;
     };
 
     const prepareLeaderData = (selectedLeader, leaders) => {
-        const selectedLeaderArr = leaders.filter( item => item.id == selectedLeader.value)
-        const leader = selectedLeaderArr[0];
+        const selectedLeaderArr = leaders.filter( item => item.id === selectedLeader.value)
+        let leader = selectedLeaderArr[0];
         leader = {
             customesBossFullName: leader.leaderFullName,
             customerPosition: leader.leaderPosition,
@@ -190,7 +184,6 @@ const ActiveForm = () => {
                 }
             });
             await response.json().then(data => {
-                console.log(data);
                 setCustomer(prepareCustomersData(data));
                 setLeaderOptions(prepareLeadersOptions(data));
             })
@@ -230,8 +223,9 @@ const ActiveForm = () => {
         }
     };
 
-    const createFromTemplate = async (formData, customerData, templateFile) => {
-        const templateData = {...formData, ...customerData};
+    const createFromTemplate = async (formData, customerData, selectedLeaderData, leadersData, templateFile) => {
+        const leaderData = prepareLeaderData(selectedLeaderData, leadersData);
+        const templateData = {...formData, ...customerData, ...leaderData};
         try {
             const handler = new TemplateHandler();
             const doc = await handler.process(templateFile, templateData);
@@ -323,7 +317,7 @@ const ActiveForm = () => {
                     base_text: !values.incoming_number ? true : false,
                     goods: formatPrice(values.goods)
                 }
-                createFromTemplate(formatedValues, customer, templateDoc);
+                createFromTemplate(formatedValues, customer, selectedLeader, leaders, templateDoc);
                 setSubmitting(false);
             }}
             >
