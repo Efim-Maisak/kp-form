@@ -6,9 +6,9 @@ import {
     useColorModeValue,
     Text,
     Image
-  } from '@chakra-ui/react'
+  } from '@chakra-ui/react';
 import NavItem from "../NavItem/NavItem";
-import logo from "../../assets/logo/contract-dep-logo.png"
+import logo from "../../assets/logo/contract-dep-logo.png";
 
 
 const SidebarContent = ({onClose, linkItems, ...rest}) => {

@@ -55,7 +55,6 @@ const ActiveForm = () => {
     const [isSmallerThan420] = useMediaQuery("(max-width: 420px)");
     const toast = useToast();
 
-
     const initialValues = {
         outgoing_number: "",
         outgoing_date: "",
@@ -114,7 +113,7 @@ const ActiveForm = () => {
                     leaderPosition: data.field_8276[i].value
                 });
             }
-        }
+        };
         setLeaders(leadersArr);
         setSelectedLeader(optionsArr[0]);
         return optionsArr;
@@ -359,7 +358,7 @@ const ActiveForm = () => {
                             </Box>
                         </Flex>
                         <Box py="8px" alignSelf="flex-start">
-                        <Text fontWeight="bold">Реквизиты входящего письма</Text>
+                            <Text fontWeight="bold">Реквизиты входящего письма</Text>
                         </Box>
                         <Flex w="100%" flexDirection="row" justifyContent="flex-start">
                             <Box w="200px" mr="8px">
