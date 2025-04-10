@@ -1,7 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { ChakraProvider } from "@chakra-ui/react";
-import {FiFileText} from "react-icons/fi"
+import {FiFileText} from "react-icons/fi";
 import { BsQuestionCircle } from "react-icons/bs";
 import OfferPage from "./components/Pages/OfferPage";
 import NotFoundPage from "./components/Pages/NotFoundPage";

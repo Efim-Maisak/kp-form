@@ -15,7 +15,7 @@ const AboutPage = ({linkItems}) => {
             <FormWrapper>
                 <Flex flexDirection="column" justifyContent="center" alignItems="center" h="100vh">
                     <Box bg="white" borderRadius="8px" p="16px" alignSelf="center">
-                        <Text>Приложение для автоматизации работы договорного отдела. Функционал будет добавляться.</Text>
+                        <Text>Приложение для автоматизации работы договорного отдела.</Text>
                     </Box>
                 </Flex>
             </FormWrapper>

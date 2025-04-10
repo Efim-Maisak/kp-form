@@ -22,11 +22,11 @@ import Select from "react-select";
 import { TemplateHandler } from 'easy-template-x';
 import { formatDate } from "../../utils/formatDate";
 import { formatPrice } from "../../utils/formatPrice";
-import { getRespectfullTitle } from "../../utils/getRespectfullTitle";
 import { validateName } from "../../utils/validateName";
 import { validatePrice } from "../../utils/validatePrice";
 import { validateAmount } from "../../utils/validateAmount";
-import { getDativeCase } from "../../utils/getDativeCase";
+import { prepareCustomersData } from "../../utils/prepareCustomersData";
+import { prepareLeaderData } from "../../utils/prepareLeaderData";
 import { HiDocumentCheck } from "react-icons/hi2";
 import { IoMdAddCircle } from "react-icons/io";
 
@@ -117,29 +117,6 @@ const ActiveForm = () => {
         setLeaders(leadersArr);
         setSelectedLeader(optionsArr[0]);
         return optionsArr;
-    };
-
-    const prepareCustomersData = (data) => {
-        const preparedData = {
-            customerName: data.field_7625,
-            executor: data.field_7639,
-            executorPosition: data.field_8239,
-            customerAddress: data.field_7970
-        }
-        return preparedData;
-    };
-
-    const prepareLeaderData = (selectedLeader, leaders) => {
-        const selectedLeaderArr = leaders.filter( item => item.id === selectedLeader.value)
-        let leader = selectedLeaderArr[0];
-        leader = {
-            customesBossFullName: leader.leaderFullName,
-            customerPosition: leader.leaderPosition,
-            customerBossShortName: getDativeCase(leader.leaderShortName),
-            customerBossName: leader.leaderFullName.split(" ").slice(-2).join(" "),
-            appeal: getRespectfullTitle(leader.leaderFullName.split(" ")[2])
-        }
-        return leader;
     };
 
     const createOptionsList = (customersArr) => {
